@@ -1,0 +1,178 @@
+﻿@model PagedList.IPagedList<MyMoviesCatalogApp.Models.Movie>
+@using PagedList.Mvc
+@using Microsoft.AspNet.Identity;
+<link href="~/Content/PagedList.css" rel="stylesheet" type="text/css" />
+@{
+    Layout = null;
+}
+
+@using (Html.BeginForm())
+{
+
+        <div class="input-group input-group-lg">
+            <input id="SearchString" name="SearchString" type="text" class="form-control form-group-lg" placeholder="Search by names or phrases..." style="max-width:unset" value="@ViewBag.CurrentFilter" />
+            <div class="input-group-btn">
+                @if (ViewBag.CurrentFilter != null)
+                {
+                <a class="btn btn-default" href="/Movie">
+                    <i class="glyphicon glyphicon-erase"></i>
+                </a>
+                }
+                <button class="btn btn-default" type="submit">
+                    <i class="glyphicon glyphicon-search"></i>
+                </button>
+            </div>
+        </div>
+        <hr/>
+        <div class="container">
+            <p>
+                @Html.ActionLink("Cannot find your favorite movie? Be the first one to add it in few moments!", "Create", "Movie")
+            </p>
+        </div>
+}
+        <!--Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount-->
+        @Html.PagedListPager(Model, page => Url.Action("Index", "Home", new { page, sortOrder = ViewBag.CurrentSort, currentFilter = ViewBag.CurrentFilter }))
+        <div class="container-fluid" style="align-self:center">
+            @for (int row = 0; row < 2; row++)
+            {
+                <div class="row padded">
+                    <div class="col-sm-pull-12">
+                        <div class="container-fluid">
+                            <div class="row padded">
+                                @for (int col = 0; col < 3; col++)
+                                {
+                                    var index = row * 3 + col;
+                                    if (index < Model.Count)
+                                    {
+                                        var item = Model[index];
+
+                                        <div class="col-sm-4 center-block">
+
+
+                                            <div class="panel panel-default">
+                                                <div class="panel-heading">
+                                                    <h4 class="panel-title">
+                                                        @Html.DisplayFor(modelItem => item.OriginalName) (@Html.DisplayFor(modelItem => item.Year))
+                                                    </h4>
+                                                </div>
+                                            </div>
+
+                                            <div id="collapse1_@index" class="panel-collapse collapse in">
+                                                <div class="panel-body">
+                                                    <p class="img-thumbnail center-block" style="height:314px;width:200px;">
+                                                        <img alt="" src="@item.GetPhotoAsBase64String()" style="height:100%;width:100%;" />
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div class="panel-group" id="accordion">
+                                                <div class="panel panel-default">
+                                                    <div class="panel panel-default">
+                                                        <div class="panel-heading">
+                                                            <h4 class="panel-title">
+                                                                <a data-toggle="collapse" data-parent="#accordion" href="#collapse2_@index">
+                                                                    The Story
+                                                                </a>
+                                                            </h4>
+                                                        </div>
+                                                        <div id="collapse2_@index" class="panel-collapse collapse in">
+                                                            <div class="panel-body">
+                                                                <p class="text-center">
+                                                                    @Html.DisplayFor(modelItem => item.Description)
+                                                                </p>
+                                                                @Html.Partial("GenresPartial", item.Genres)
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="panel panel-default">
+                                                        <div class="panel-heading">
+                                                            <h4 class="panel-title">
+                                                                <a data-toggle="collapse" data-parent="#accordion" href="#collapse3_@index">
+                                                                    Writers
+                                                                </a>
+                                                            </h4>
+                                                        </div>
+                                                        <div id="collapse3_@index" class="panel-collapse collapse">
+                                                            <div class="panel-body">
+                                                                @Html.Partial("WritersPartial", item.Writers)
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="panel panel-default">
+                                                        <div class="panel-heading">
+                                                            <h4 class="panel-title">
+                                                                <a data-toggle="collapse" data-parent="#accordion" href="#collapse4_@index">
+                                                                    Actors
+                                                                </a>
+                                                            </h4>
+                                                        </div>
+                                                        <div id="collapse4_@index" class="panel-collapse collapse">
+                                                            <div class="panel-body">
+                                                                @Html.Partial("ActorsPartial", item.Actors)
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <p class="center-block">
+                                                    <ul class="breadcrumb center-block text-center">
+                                                        <li>
+                                                            @if (item.CreatedUserID == HttpContext.Current.User.Identity.GetUserId())
+                                                            {
+                                                                @Html.ActionLink("Edit", "Edit", controllerName: "Movie", routeValues: new { id = item.ID }, htmlAttributes: new { @class = "btn-default btn-sm" });
+                                                            }
+                                                        </li>
+                                                        <li>
+                                                            @Html.ActionLink("Details", "Details", controllerName: "Movie", routeValues: new { id = item.ID }, htmlAttributes: new { @class = "btn-default btn-sm" })
+                                                        </li>
+                                                        <li>
+                                                            @if (item.CreatedUserID == HttpContext.Current.User.Identity.GetUserId())
+                                                            {
+                                                                
+                                                                <a href="#" type="button" class="btn-default btn-sm" data-toggle="modal" data-target="#myModal_@index">Delete</a>
+
+                                                                <div id="myModal_@index" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                                                                    <div class="modal-dialog">
+                                                                        <div class="modal-content">
+                                                                            <div class="modal-header">
+                                                                                <h4>Are you sure to delete?</h4>
+                                                                            </div>
+                                                                            <div class="modal-body">
+                                                                                This operation cannot be undone.
+                                                                                <br />
+                                                                                Please press Ok to go to the delete page, otherwise press Cancel.
+                                                                            </div>
+                                                                            <div class="modal-footer">
+                                                                                <button type="button" class="btn btn-default btn-lg" data-dismiss="modal">Cancel</button>
+                                                                                @Html.ActionLink("Go to Confirm Delete", "Delete", controllerName: "Movie", routeValues: new { id = item.ID }, htmlAttributes: new { @class = "btn btn-lg btn-danger btn-ok" })
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            }
+                                                            </li>
+                                                            </ul>
+                                                            </p>
+                                                        </div>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        break;
+                                    }
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+        <script>
+            $(document).ready(function () {
+                $('[data-toggle="popover"]').popover();
+            });
+        </script>
+        <br />
+
+<!--Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount-->
+@Html.PagedListPager(Model, page => Url.Action("Index", "Home", new { page, sortOrder = ViewBag.CurrentSort, currentFilter = ViewBag.CurrentFilter }))
+

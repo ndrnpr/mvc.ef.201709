@@ -1,0 +1,173 @@
+﻿@model MyMoviesCatalogApp.Models.Movie
+@using Microsoft.AspNet.Identity;
+
+@{
+    ViewBag.Title = "Edit";
+}
+<h2>@Html.DisplayFor(model => model.OriginalName) (@Html.DisplayFor(model => model.Year))</h2>
+
+<p>
+    @Html.ActionLink("Back to List", "Index", "Home")
+</p>
+
+@using (Html.BeginForm(null, null, FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    @Html.HiddenFor(model => model.ID)
+    @Html.AntiForgeryToken()
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-8">
+                <h4>Directed by @Html.DisplayFor(model => model.Director.FullName)</h4>
+            </div>
+            <div class="col-sm-4">
+                <div class="btn-group pull-right">
+                    
+                    @if (Model.CreatedUserID == HttpContext.Current.User.Identity.GetUserId())
+                    {
+                    @Html.ActionLink("Back to List", "Index", "Home", new { @class = "btn btn-default btn-md" })
+                    <label class="btn btn-info">
+                        <span class="glyphicon glyphicon-search"></span>
+                        Poster @Html.TextBoxFor(m => m._FileData, new { type = "file", @class = "form-control", style = "display: none;" })
+                    </label>
+                    <input type="submit" value="Save card" class="btn btn-primary btn-md" /> 
+                    <a href="#" type="button" class="btn btn-danger btn-md" data-toggle="modal" data-target="#myModal">Delete</a>
+                    }
+                    else
+                    {
+                        @Html.ActionLink("Back to List", "Index", "Home", new { @class = "btn btn-primary btn-md" })
+                    }
+                </div>
+
+                <div id="myModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h4>Are you sure to delete?</h4>
+                            </div>
+                            <div class="modal-body">
+                                This operation cannot be undone.
+                                <br />
+                                Please press Ok to go to the delete page, otherwise press Cancel.
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default btn-lg" data-dismiss="modal">Cancel</button>
+                                @Html.ActionLink("Go to Confirm Delete", "Delete", controllerName: "Movie", routeValues: new { id = Model.ID }, htmlAttributes: new { @class = "btn btn-lg btn-danger btn-ok" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr />
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-4">
+                <div class="card card-inverse card-primary">
+                    <p class="img-thumbnail center-block" style="height:157%;width:100%;">
+                        @if (Model.Photo != null)
+                        {
+                            <img class="img-responsive" alt="" src="@Model.GetPhotoAsBase64String()" style="height:100%;width:100%;" />
+                        }
+                    </p>
+                </div>
+            </div>
+            <div class="col-sm-8">
+                <div class="card card-inverse card-primary">
+                    <div class="row h-100">
+                        <div class="col-md-12">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">General</div>
+                                <div class="panel-body">
+                                    <div class="row h-50">
+                                        <div class="col-md-9">
+                                            @Html.LabelFor(model => model.OriginalName, htmlAttributes: new { @class = "control-label" }):
+                                            @Html.EditorFor(model => model.OriginalName, new { htmlAttributes = new { @class = "form-control" } })
+                                            @Html.ValidationMessageFor(model => model.OriginalName, "", new { @class = "text-danger" })
+                                        </div>
+                                        <div class="col-md-3">
+                                            @Html.LabelFor(model => model.Year, htmlAttributes: new { @class = "control-label" }):
+                                            @Html.EditorFor(model => model.Year, new { htmlAttributes = new { @class = "form-control" } })
+                                            @Html.ValidationMessageFor(model => model.Year, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="row h-50">
+                                        <div class="col-md-12">
+                                            @Html.LabelFor(model => model.Description, htmlAttributes: new { @class = "control-label" }):
+                                            @Html.TextAreaFor(model => model.Description, new { @class = "form-control" })
+                                            @Html.ValidationMessageFor(model => model.Description, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row h-100">
+                        <div class="col-md-12">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">Crew</div>
+                                <div class="panel-body">
+                                    <div class="row h-50">
+                                        <div class="col-md-6">
+                                            @Html.LabelFor(model => model.Director, htmlAttributes: new { @class = "control-label" }):
+                                            @Html.DropDownListFor(model => model.DirectorID, ViewBag.PersonsList as IEnumerable<SelectListItem>, new { @class = "form-control", @size = "2" })
+                                            @Html.ValidationMessageFor(model => model.Director, "", new { @class = "text-danger" })
+                                        </div>
+                                        <div class="col-md-6">
+                                            @Html.LabelFor(model => model.Genres, htmlAttributes: new { @class = "control-label" }):
+                                            <p>
+                                                @Html.DropDownListFor(model => model._GenreIDs, ViewBag.GenresList as IEnumerable<SelectListItem>, new { multiple = "multiple", @class = "multiselect" })
+                                                @Html.ValidationMessageFor(model => model.Genres, "", new { @class = "text-danger" })
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="row h-50">
+                                        <div class="col-md-6">
+                                            @Html.LabelFor(model => model.Writers, htmlAttributes: new { @class = "control-label" }):
+                                            @Html.DropDownListFor(model => model._WriterIDs, ViewBag.WritersList as IEnumerable<SelectListItem>, new { multiple = "multiple", @class = "form-control" })
+                                            @Html.ValidationMessageFor(model => model.Writers, "", new { @class = "text-danger" })
+                                        </div>
+                                        <div class="col-md-6">
+                                            @Html.LabelFor(model => model.Actors, htmlAttributes: new { @class = "control-label" }):
+                                            @Html.DropDownListFor(model => model._ActorIDs, ViewBag.ActorsList as IEnumerable<SelectListItem>, new { multiple = "multiple", @class = "form-control" })
+                                            @Html.ValidationMessageFor(model => model.Actors, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>                    
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                @Html.LabelFor(model => model.CreatedUser, htmlAttributes: new { @class = "control-label" })
+                |
+                @Html.DisplayFor(model => model.CreatedUser.UserName)
+                |
+                @Html.DisplayFor(model => model.CreatedAt)
+            </div>
+            @if (Model.LastUpdatedAt != null)
+            {
+            <div class="col-md-6">
+                @Html.LabelFor(model => model.LastUpdatedUser, htmlAttributes: new { @class = "control-label" })
+                |
+                @Html.DisplayFor(model => model.LastUpdatedUser.UserName)
+                |
+                @Html.DisplayFor(model => model.LastUpdatedAt):
+            </div>
+            }
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        $(function() {
+            $(".multiselect").multiselect();
+        });
+    </script>
+}
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

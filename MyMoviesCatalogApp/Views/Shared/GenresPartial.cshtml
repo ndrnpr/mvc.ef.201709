@@ -1,0 +1,10 @@
+﻿@using MyMoviesCatalogApp.Models;
+@model IEnumerable<Genre>
+
+@foreach (Genre g in Model)
+{
+    <div class="btn-group">
+        <form action="/Movie" class="form-inline"><input type="hidden" id="SearchString" name="SearchString" value="@g.Name" /><button type="submit" class="btn btn-default btn-xs">@g.Name</button></form>
+    </div>
+}
+

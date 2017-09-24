@@ -1,0 +1,7 @@
+﻿@using MyMoviesCatalogApp.Models;
+@model HashSet<Person>
+
+@foreach (Person g in Model)
+{
+    <a type="button" class="btn btn-xs" href="/Person/@g.ID.ToString()">@g.FullName</a>
+}
