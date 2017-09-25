@@ -35,23 +35,33 @@ namespace MyMoviesCatalogApp.DAL
 
         public T GetOrAdd<T>(T entity) where T : MovieCatalogEntity
         {
-            Func<T, bool> lookup_func;
+            Func<T, bool> lookup_func = null;
             DbSet<T> lookup_source = null;
             T lookup_value = null;
 
             if (typeof(T).Name == "Person")
             {
-                lookup_func = (o => Equals((o as Person).FirstName, (entity as Person).FirstName)
-                        && Equals((o as Person).LastName, (entity as Person).LastName)
-                        && Equals((o as Person).MiddleName, (entity as Person).MiddleName));
+                if ((entity as Person).FirstName != null)
+                    lookup_func = (o => Equals((o as Person).FirstName, (entity as Person).FirstName)
+                            && Equals((o as Person).LastName, (entity as Person).LastName)
+                            && Equals((o as Person).MiddleName, (entity as Person).MiddleName));
+                else
+                    lookup_func = (o => Equals(o.ID, entity.ID));
                 lookup_source = Persons as DbSet<T>;                
             }
             else
             {
-                lookup_func = (o => o.Name.Equals(entity.Name));
+                if ((entity.Name != null))
+                    lookup_func = (o => Equals(o.Name, entity.Name));
+                else
+                    lookup_func = (o => Equals(o.ID, entity.ID));
                 switch (typeof(T).Name)
                 {
                     case "Actor":
+                        if ((entity as Actor).PersonID != 0 && (entity as Actor).MovieID != 0) // not an Actor object for a movie object just created
+                            lookup_func = (w => Equals((w as Actor).PersonID, (entity as Actor).PersonID) && Equals((w as Actor).MovieID, (entity as Actor).MovieID));
+                        else
+                            goto SkipLookup;
                         lookup_source = Actors as DbSet<T>;
                         break;
                     case "Genre":
@@ -61,6 +71,10 @@ namespace MyMoviesCatalogApp.DAL
                         lookup_source = GenreGroups as DbSet<T>;
                         break;
                     case "Writer":
+                        if ((entity as Writer).PersonID != 0 && (entity as Writer).MovieID != 0) // not a Writer object for a movie object just created
+                            lookup_func = (w => Equals((w as Writer).PersonID, (entity as Writer).PersonID) && Equals((w as Writer).MovieID, (entity as Writer).MovieID));
+                        else
+                            goto SkipLookup;
                         lookup_source = Writers as DbSet<T>;
                         break;
                 }
@@ -75,6 +89,7 @@ namespace MyMoviesCatalogApp.DAL
                         lookup_source.Add(entity);
                 }
             }
+        SkipLookup:
             if (lookup_value == null)
                 lookup_value = entity;
 

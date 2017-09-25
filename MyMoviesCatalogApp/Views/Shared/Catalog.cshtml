@@ -31,7 +31,7 @@
         </div>
 }
         <!--Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount-->
-        @Html.PagedListPager(Model, page => Url.Action("Index", "Home", new { page, sortOrder = ViewBag.CurrentSort, currentFilter = ViewBag.CurrentFilter }))
+        @Html.PagedListPager(Model, page => Url.Action("Index", ViewBag.CurrentController ?? "Home", new { page, sortOrder = ViewBag.CurrentSort, currentFilter = ViewBag.CurrentFilter }))
         <div class="container-fluid" style="align-self:center">
             @for (int row = 0; row < 2; row++)
             {
@@ -174,5 +174,5 @@
         <br />
 
 <!--Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount-->
-@Html.PagedListPager(Model, page => Url.Action("Index", "Home", new { page, sortOrder = ViewBag.CurrentSort, currentFilter = ViewBag.CurrentFilter }))
+@Html.PagedListPager(Model, page => Url.Action("Index", ViewBag.CurrentController ?? "Home", new { page, sortOrder = ViewBag.CurrentSort, currentFilter = ViewBag.CurrentFilter }))
 

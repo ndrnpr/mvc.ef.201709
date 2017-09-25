@@ -17,10 +17,10 @@
 
     <div class="container-fluid">
         <div class="row">
-            <div class="col-sm-8">
+            <div class="col-sm-7">
                 <h4>Directed by @Html.DisplayFor(model => model.Director.FullName)</h4>
             </div>
-            <div class="col-sm-4">
+            <div class="col-sm-5">
                 <div class="btn-group pull-right">
                     
                     @if (Model.CreatedUserID == HttpContext.Current.User.Identity.GetUserId())

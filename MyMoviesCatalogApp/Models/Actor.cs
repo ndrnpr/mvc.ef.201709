@@ -20,8 +20,29 @@ namespace MyMoviesCatalogApp.Models
         public virtual Movie Movie { get; set; }
 
         [NotMapped]
-        public virtual string FullName { get { return Person.FullName; } }
+        public virtual string FullName
+        {
+            get
+            {
+                return Name;
+            }
+        }
         [NotMapped]
-        public override string Name { get { return Person.FullName; } }
+        public override string Name
+        {
+            get
+            {
+                string result;
+                try
+                {
+                    result = (Person != null) ? Person.FullName : base.Name;
+                }
+                catch
+                {
+                    result = base.Name;
+                }
+                return result;
+            }
+        }
     }
 }

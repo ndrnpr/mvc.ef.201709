@@ -44,6 +44,7 @@ namespace MyMoviesCatalogApp.Controllers
             }
 
             ViewBag.CurrentFilter = searchString;
+            ViewBag.CurrentController = "Movie";
 
             var movies = from s in db.Movies
                          select s;
@@ -117,7 +118,7 @@ namespace MyMoviesCatalogApp.Controllers
         [Authorize()]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "ID,OriginalName,Year,Description,DirectorID,_FileData,_GenreIDs,_WriterIDs,_ActorIDs")] Movie movieInfo)
+        public ActionResult Create([Bind(Include = "OriginalName,Year,Description,DirectorID,_FileData,_GenreIDs,_WriterIDs,_ActorIDs")] Movie movieInfo)
         {
             var supportedContentTypes = new string[] { "image/gif", "image/jpeg", "image/pjpeg", "image/png" };
 
@@ -128,11 +129,14 @@ namespace MyMoviesCatalogApp.Controllers
 
             if (ModelState.IsValid)
             {
-                movieInfo.Writers = db.Writers.Where(o => movieInfo._WriterIDs.Contains(o.ID)).ToList();
-                movieInfo.Actors = db.Actors.Where(o => movieInfo._ActorIDs.Contains(o.ID)).ToList();
-                movieInfo.Genres = db.Genres.Where(o => movieInfo._GenreIDs.Contains(o.ID)).ToList();
+                if (movieInfo._WriterIDs != null)
+                    movieInfo.Writers = movieInfo._WriterIDs.Select(writerID => db.GetOrAdd(new Writer { PersonID = writerID, Movie = movieInfo })).ToList();
+                if (movieInfo._ActorIDs != null)
+                    movieInfo.Actors = movieInfo._ActorIDs.Select(actorID => db.GetOrAdd(new Actor { PersonID = actorID, Movie = movieInfo })).ToList(); 
+                if (movieInfo._GenreIDs != null)
+                    movieInfo.Genres = movieInfo._GenreIDs.Select(genreID => db.Genres.Attach(new Genre { ID = genreID })).ToList();
 
-                db.Entry(movieInfo).State = EntityState.Modified;
+                db.Entry(movieInfo).State = EntityState.Added;
 
                 if (movieInfo._FileData != null)
                 {
@@ -198,10 +202,13 @@ namespace MyMoviesCatalogApp.Controllers
             if (ModelState.IsValid)
             {
 
-                movieInfo.Writers = db.Writers.Where(o => movieInfo._WriterIDs.Contains(o.ID)).ToList();
-                movieInfo.Actors = db.Actors.Where(o => movieInfo._ActorIDs.Contains(o.ID)).ToList();
-                movieInfo.Genres = db.Genres.Where(o => movieInfo._GenreIDs.Contains(o.ID)).ToList();
-              
+                if (movieInfo._WriterIDs != null)
+                    movieInfo.Writers = movieInfo._WriterIDs.Select(writerID => db.GetOrAdd(new Writer { PersonID = writerID, MovieID = movieInfo.ID })).ToList();
+                if (movieInfo._ActorIDs != null)
+                    movieInfo.Actors = movieInfo._ActorIDs.Select(actorID => db.GetOrAdd(new Actor { PersonID = actorID, MovieID = movieInfo.ID })).ToList();
+                if (movieInfo._GenreIDs != null)
+                    movieInfo.Genres = movieInfo._GenreIDs.Select(genreID => db.Genres.Attach(new Genre { ID = genreID })).ToList();
+
                 db.Entry(movieInfo).State = EntityState.Modified;
 
                 if (movieInfo._FileData != null)

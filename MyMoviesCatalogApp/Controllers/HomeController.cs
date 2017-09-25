@@ -30,6 +30,7 @@ namespace MyMoviesCatalogApp.Controllers
             }
 
             ViewBag.CurrentFilter = searchString;
+            ViewBag.CurrentController = "Home";
 
             var movies = from s in db.Movies select s;
             if (!String.IsNullOrEmpty(searchString))
