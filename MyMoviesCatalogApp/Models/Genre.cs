@@ -14,6 +14,12 @@ namespace MyMoviesCatalogApp.Models
 
         public virtual ICollection<Movie> Movies { get; set; }
         public virtual GenreGroup Group { get; set; }
+
+        public Genre()
+        {
+            Movies = new HashSet<Movie>();
+        }
+
     }
 
     public class GenreGroup : MovieCatalogEntity
@@ -21,5 +27,11 @@ namespace MyMoviesCatalogApp.Models
         //public string Name { get; set; }
 
         public virtual ICollection<Genre> Genres { get; set; }
+
+        public GenreGroup()
+        {
+            Genres = new HashSet<Genre>();
+        }
+
     }
 }

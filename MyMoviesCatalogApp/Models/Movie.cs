@@ -37,6 +37,8 @@ namespace MyMoviesCatalogApp.Models
         public Movie()
         {
             Genres = new HashSet<Genre>();
+            Actors = new HashSet<Actor>();
+            Writers = new HashSet<Writer>();
         }
     }
 }
