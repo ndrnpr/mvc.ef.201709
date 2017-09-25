@@ -15,7 +15,7 @@ using Microsoft.Owin.Security;
 
 namespace MyMoviesCatalogApp.DAL
 {
-    public class MoviesCatalogContext : IdentityDbContext<ApplicationUser> 
+    public class MoviesCatalogContext : IdentityDbContext<ApplicationUser>
     {
         public MoviesCatalogContext() : base("DefaultConnection")
         {
@@ -47,7 +47,7 @@ namespace MyMoviesCatalogApp.DAL
                             && Equals((o as Person).MiddleName, (entity as Person).MiddleName));
                 else
                     lookup_func = (o => Equals(o.ID, entity.ID));
-                lookup_source = Persons as DbSet<T>;                
+                lookup_source = Persons as DbSet<T>;
             }
             else
             {
@@ -83,18 +83,75 @@ namespace MyMoviesCatalogApp.DAL
             {
                 lookup_value = lookup_source.Where(lookup_func).FirstOrDefault();
                 if (lookup_value == null)
-                { 
+                {
                     lookup_value = lookup_source.Local.Where(lookup_func).FirstOrDefault();
                     if (lookup_value == null)
                         lookup_source.Add(entity);
                 }
             }
-        SkipLookup:
+            SkipLookup:
             if (lookup_value == null)
                 lookup_value = entity;
 
             return lookup_value;
         }
+
+        public IEnumerable<Person> GetActorCandidates(Movie movie = null)
+        {
+            if (movie != null)
+                return
+                    // persons who are actors in current movie go first => they must have max rank
+                    movie.Actors.Select(ma => new { Person = ma.Person, Rank = 2 })
+                        // person who are actors in any other movies, but not actors of the current movie go then => they must have itermediate rank 
+                        .Union(Actors.Where(a => !Actors.Any(ap => a.PersonID == ap.PersonID && ap.MovieID == movie.ID)).Select(a => new { Person = a.Person, Rank = 1 }))
+                        // any other persons go last => they must have lowest rank
+                        .Union(Persons.Where(p => !Actors.Any(a => a.PersonID == p.ID)).Select(p => new { Person = p, Rank = 0 }))
+                        // ordering 
+                        .OrderByDescending(p => p.Rank)
+                        .ThenBy(p => p.Person.LastName)
+                        .Select(p => p.Person)
+                        .ToList();
+            else
+                return
+                    // person who are writers in any movies go first => they must have max rank 
+                    Actors.Select(a => new { Person = a.Person, Rank = 1 })
+                        // any other persons go last => they must have lowest rank
+                        .Union(Persons.Where(p => !Actors.Any(a => a.PersonID == p.ID)).Select(p => new { Person = p, Rank = 0 }))
+                        // ordering 
+                        .OrderByDescending(p => p.Rank)
+                        .ThenBy(p => p.Person.LastName)
+                        .Select(p => p.Person)
+                        .ToList();
+        }
+
+        public IEnumerable<Person> GetWriterCandidates(Movie movie = null)
+        {
+            if (movie != null)
+                return
+                    // persons who are writers for current movie go first => they must have max rank
+                    movie.Writers.Select(ma => new { Person = ma.Person, Rank = 2 })
+                        // person who are writers in any other movies, but not writers of the current movie go then => they must have itermediate rank 
+                        .Union(Writers.Where(a => !Writers.Any(ap => a.PersonID == ap.PersonID && ap.MovieID == movie.ID)).Select(a => new { Person = a.Person, Rank = 1 }))
+                        // any other persons go last => they must have lowest rank
+                        .Union(Persons.Where(p => !Writers.Any(a => a.PersonID == p.ID)).Select(p => new { Person = p, Rank = 0 }))
+                        // ordering 
+                        .OrderByDescending(p => p.Rank)
+                        .ThenBy(p => p.Person.LastName)
+                        .Select(p => p.Person)
+                        .ToList();
+            else
+                return
+                    // person who are writers in any movies go first => they must have max rank 
+                    Writers.Select(a => new { Person = a.Person, Rank = 1 })
+                        // any other persons go last => they must have lowest rank
+                        .Union(Persons.Where(p => !Writers.Any(a => a.PersonID == p.ID)).Select(p => new { Person = p, Rank = 0 }))
+                        // ordering 
+                        .OrderByDescending(p => p.Rank)
+                        .ThenBy(p => p.Person.LastName)
+                        .Select(p => p.Person)
+                        .ToList();
+        }
+
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {

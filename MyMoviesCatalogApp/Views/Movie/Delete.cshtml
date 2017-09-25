@@ -5,10 +5,6 @@
 }
 <h2>@Html.DisplayFor(model => model.OriginalName) (@Html.DisplayFor(model => model.Year))</h2>
 
-<p>
-    @Html.ActionLink("Back to List", "Index", "Home")
-</p>
-
 @using (Html.BeginForm(null, null, FormMethod.Post, new { enctype = "multipart/form-data", @id = "delete_movie_form" }))
 {
     @Html.HiddenFor(model => model.ID)
@@ -25,13 +21,13 @@
 
                 @if (Model.CreatedUserID == HttpContext.Current.User.Identity.GetUserId())
                 {
-                    @Html.ActionLink("Back to List", "Index", "Home", new { @class = "btn btn-default btn-md" })
-                    @Html.ActionLink("Edit card", "Edit", "Movie", new { @class = "btn btn-primary btn-md" })
+                    <a class="btn btn-default btn-md" href="/Movie">Catalog</a>
+                    @Html.ActionLink("Edit", "Edit", new { id = Model.ID }, new { @class = "btn btn-primary btn-md" })
                     <a href="#" type="button" class="btn btn-danger btn-md" data-toggle="modal" data-target="#myModal">Confirm Delete</a>
                 }
                 else
                 {
-                    @Html.ActionLink("Back to List", "Index", "Home", new { @class = "btn btn-primary btn-md" })
+                    <a class="btn btn-primary btn-md" href="/Movie">Catalog</a>
                 }
             </div>
 

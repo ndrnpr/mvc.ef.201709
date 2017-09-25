@@ -91,10 +91,13 @@ namespace MyMoviesCatalogApp.Controllers
             {
                 return HttpNotFound();
             }
-            db.Entry(movieInfo).Reload();
+            db.Entry(movieInfo).Reload();           
+
             ViewBag.GenresList = new MultiSelectList(db.Genres.OrderBy(g => g.GroupID).ThenBy(g => g.Name).ToList(), "ID", "Name", "Group.Name", selectedValues: movieInfo.Genres.Select(s => s.ID.ToString()).ToArray());
-            ViewBag.ActorsList = new MultiSelectList(movieInfo.Actors.Select(a => new { Person = a.Person, IsActor = db.Actors.Where(ap => ap.PersonID == a.PersonID).Count() }).Union(db.Persons.Select(p => new { Person = p, IsActor = db.Actors.Where(a => a.PersonID == p.ID).Count() })).OrderByDescending(p => p.IsActor).ThenBy(p => p.Person.LastName).ToList(), "Person.ID", "Person.FullName", movieInfo.Actors.Select(a => a.PersonID.ToString()).ToArray());
-            ViewBag.WritersList = new MultiSelectList(movieInfo.Writers.Select(w => new { Person = w.Person, IsWriter = db.Writers.Where(wp => wp.PersonID == w.PersonID).Count() }).Union(db.Persons.Select(p => new { Person = p, IsWriter = db.Writers.Where(w => w.PersonID == p.ID).Count() })).OrderByDescending(p => p.IsWriter).ThenBy(p => p.Person.LastName).ToList(), "Person.ID", "Person.FullName", selectedValues: movieInfo.Writers.Select(w => w.PersonID.ToString()).ToArray());
+            ViewBag.ActorsList = new MultiSelectList(db.GetActorCandidates(movieInfo), "ID", "FullName", movieInfo.Actors.Select(a => a.PersonID.ToString()).ToArray());
+            ViewBag.WritersList = new MultiSelectList(db.GetWriterCandidates(movieInfo), "ID", "FullName", movieInfo.Writers.Select(a => a.PersonID.ToString()).ToArray());
+            //ViewBag.ActorsList = new MultiSelectList(movieInfo.Actors.Select(a => new { Person = a.Person, IsActor = db.Actors.Where(ap => ap.PersonID == a.PersonID).Count() }).Union(db.Persons.Select(p => new { Person = p, IsActor = db.Actors.Where(a => a.PersonID == p.ID).Count() })).OrderByDescending(p => p.IsActor).ThenBy(p => p.Person.LastName).ToList(), "Person.ID", "Person.FullName", movieInfo.Actors.Select(a => a.PersonID.ToString()).ToArray());
+            //ViewBag.WritersList = new MultiSelectList(movieInfo.Writers.Select(w => new { Person = w.Person, IsWriter = db.Writers.Where(wp => wp.PersonID == w.PersonID).Count() }).Union(db.Persons.Select(p => new { Person = p, IsWriter = db.Writers.Where(w => w.PersonID == p.ID).Count() })).OrderByDescending(p => p.IsWriter).ThenBy(p => p.Person.LastName).ToList(), "Person.ID", "Person.FullName", selectedValues: movieInfo.Writers.Select(w => w.PersonID.ToString()).ToArray());
             if (movieInfo.Director != null)
                 ViewBag.PersonsList = new SelectList(new HashSet<Person> { movieInfo.Director }.Union(db.Persons.OrderBy(o => o.LastName)), "ID", "FullName", movieInfo.DirectorID);
             else
@@ -107,8 +110,10 @@ namespace MyMoviesCatalogApp.Controllers
         public ActionResult Create()
         {            
             ViewBag.GenresList = new MultiSelectList(db.Genres.OrderBy(g => g.GroupID).ThenBy(g => g.Name).ToList(), "ID", "Name", "Group.Name");
-            ViewBag.ActorsList = new MultiSelectList(db.Persons.Select(p => new { Person = p, IsActor = db.Actors.Where(w => w.PersonID == p.ID).Count() }).OrderByDescending(p => p.IsActor).ThenBy(p => p.Person.LastName).ToList(), "Person.ID", "Person.FullName");
-            ViewBag.WritersList = new MultiSelectList(db.Persons.Select(p => new { Person = p, IsWriter = db.Writers.Where(w => w.PersonID == p.ID).Count() }).OrderByDescending(p => p.IsWriter).ThenBy(p => p.Person.LastName).ToList(), "Person.ID", "Person.FullName");
+            ViewBag.ActorsList = new MultiSelectList(db.GetActorCandidates(), "ID", "FullName");
+            ViewBag.WritersList = new MultiSelectList(db.GetWriterCandidates(), "ID", "FullName");
+            //ViewBag.ActorsList = new MultiSelectList(db.Persons.Select(p => new { Person = p, IsActor = db.Actors.Where(w => w.PersonID == p.ID).Count() }).OrderByDescending(p => p.IsActor).ThenBy(p => p.Person.LastName).ToList(), "Person.ID", "Person.FullName");
+            //ViewBag.WritersList = new MultiSelectList(db.Persons.Select(p => new { Person = p, IsWriter = db.Writers.Where(w => w.PersonID == p.ID).Count() }).OrderByDescending(p => p.IsWriter).ThenBy(p => p.Person.LastName).ToList(), "Person.ID", "Person.FullName");
             ViewBag.PersonsList = new SelectList(db.Persons.Select(p => new { Person = p, IsDirector = db.Movies.Where(w => w.DirectorID == p.ID).Count() }).OrderByDescending(p => p.IsDirector).ThenBy(p => p.Person.LastName).ToList(), "Person.ID", "Person.FullName");
             return View();
         }
@@ -176,8 +181,10 @@ namespace MyMoviesCatalogApp.Controllers
             }
             db.Entry(movieInfo).Reload();
             ViewBag.GenresList = new MultiSelectList(db.Genres.OrderBy(g => g.GroupID).ThenBy(g => g.Name).ToList(), "ID", "Name", "Group.Name", selectedValues: movieInfo.Genres.Select(s => s.ID.ToString()).ToArray());
-            ViewBag.ActorsList = new MultiSelectList(movieInfo.Actors.Select(a => new { Person = a.Person, IsActor = db.Actors.Where(ap => ap.PersonID == a.PersonID).Count() }).Union(db.Persons.Select(p => new { Person = p, IsActor = db.Actors.Where(a => a.PersonID == p.ID).Count() })).OrderByDescending(p => p.IsActor).ThenBy(p => p.Person.LastName).ToList(), "Person.ID", "Person.FullName", movieInfo.Actors.Select(a => a.PersonID.ToString()).ToArray());
-            ViewBag.WritersList = new MultiSelectList(movieInfo.Writers.Select(w => new { Person = w.Person, IsWriter = db.Writers.Where(wp => wp.PersonID == w.PersonID).Count() }).Union(db.Persons.Select(p => new { Person = p, IsWriter = db.Writers.Where(w => w.PersonID == p.ID).Count() })).OrderByDescending(p => p.IsWriter).ThenBy(p => p.Person.LastName).ToList(), "Person.ID", "Person.FullName", selectedValues: movieInfo.Writers.Select(w => w.PersonID.ToString()).ToArray());
+            ViewBag.ActorsList = new MultiSelectList(db.GetActorCandidates(movieInfo), "ID", "FullName", movieInfo.Actors.Select(a => a.PersonID.ToString()).ToArray());
+            ViewBag.WritersList = new MultiSelectList(db.GetWriterCandidates(movieInfo), "ID", "FullName", movieInfo.Writers.Select(a => a.PersonID.ToString()).ToArray());
+            //ViewBag.ActorsList = new MultiSelectList(movieInfo.Actors.Select(a => new { Person = a.Person, IsActor = db.Actors.Where(ap => ap.PersonID == a.PersonID).Count() }).Union(db.Persons.Select(p => new { Person = p, IsActor = db.Actors.Where(a => a.PersonID == p.ID).Count() })).OrderByDescending(p => p.IsActor).ThenBy(p => p.Person.LastName).ToList(), "Person.ID", "Person.FullName", movieInfo.Actors.Select(a => a.PersonID.ToString()).ToArray());
+            //ViewBag.WritersList = new MultiSelectList(movieInfo.Writers.Select(w => new { Person = w.Person, IsWriter = db.Writers.Where(wp => wp.PersonID == w.PersonID).Count() }).Union(db.Persons.Select(p => new { Person = p, IsWriter = db.Writers.Where(w => w.PersonID == p.ID).Count() })).OrderByDescending(p => p.IsWriter).ThenBy(p => p.Person.LastName).ToList(), "Person.ID", "Person.FullName", selectedValues: movieInfo.Writers.Select(w => w.PersonID.ToString()).ToArray());
             if (movieInfo.Director != null)
                 ViewBag.PersonsList = new SelectList(new HashSet<Person> { movieInfo.Director }.Union(db.Persons.OrderBy(o => o.LastName)), "ID", "FullName", movieInfo.DirectorID);
             else
@@ -256,8 +263,10 @@ namespace MyMoviesCatalogApp.Controllers
             }
             db.Entry(movieInfo).Reload();
             ViewBag.GenresList = new MultiSelectList(db.Genres.OrderBy(g => g.GroupID).ThenBy(g => g.Name).ToList(), "ID", "Name", "Group.Name", selectedValues: movieInfo.Genres.Select(s => s.ID.ToString()).ToArray());
-            ViewBag.ActorsList = new MultiSelectList(movieInfo.Actors.Select(a => new { Person = a.Person, IsActor = db.Actors.Where(ap => ap.PersonID == a.PersonID).Count() }).Union(db.Persons.Select(p => new { Person = p, IsActor = db.Actors.Where(a => a.PersonID == p.ID).Count() })).OrderByDescending(p => p.IsActor).ThenBy(p => p.Person.LastName).ToList(), "Person.ID", "Person.FullName", movieInfo.Actors.Select(a => a.PersonID.ToString()).ToArray());
-            ViewBag.WritersList = new MultiSelectList(movieInfo.Writers.Select(w => new { Person = w.Person, IsWriter = db.Writers.Where(wp => wp.PersonID == w.PersonID).Count() }).Union(db.Persons.Select(p => new { Person = p, IsWriter = db.Writers.Where(w => w.PersonID == p.ID).Count() })).OrderByDescending(p => p.IsWriter).ThenBy(p => p.Person.LastName).ToList(), "Person.ID", "Person.FullName", selectedValues: movieInfo.Writers.Select(w => w.PersonID.ToString()).ToArray());
+            ViewBag.ActorsList = new MultiSelectList(db.GetActorCandidates(movieInfo), "ID", "FullName", movieInfo.Actors.Select(a => a.PersonID.ToString()).ToArray());
+            ViewBag.WritersList = new MultiSelectList(db.GetWriterCandidates(movieInfo), "ID", "FullName", movieInfo.Writers.Select(a => a.PersonID.ToString()).ToArray());
+            //ViewBag.ActorsList = new MultiSelectList(movieInfo.Actors.Select(a => new { Person = a.Person, IsActor = db.Actors.Where(ap => ap.PersonID == a.PersonID).Count() }).Union(db.Persons.Select(p => new { Person = p, IsActor = db.Actors.Where(a => a.PersonID == p.ID).Count() })).OrderByDescending(p => p.IsActor).ThenBy(p => p.Person.LastName).ToList(), "Person.ID", "Person.FullName", movieInfo.Actors.Select(a => a.PersonID.ToString()).ToArray());
+            //ViewBag.WritersList = new MultiSelectList(movieInfo.Writers.Select(w => new { Person = w.Person, IsWriter = db.Writers.Where(wp => wp.PersonID == w.PersonID).Count() }).Union(db.Persons.Select(p => new { Person = p, IsWriter = db.Writers.Where(w => w.PersonID == p.ID).Count() })).OrderByDescending(p => p.IsWriter).ThenBy(p => p.Person.LastName).ToList(), "Person.ID", "Person.FullName", selectedValues: movieInfo.Writers.Select(w => w.PersonID.ToString()).ToArray());
             if (movieInfo.Director != null)
                 ViewBag.PersonsList = new SelectList(new HashSet<Person> { movieInfo.Director }.Union(db.Persons.OrderBy(o => o.LastName)), "ID", "FullName", movieInfo.DirectorID);
             else

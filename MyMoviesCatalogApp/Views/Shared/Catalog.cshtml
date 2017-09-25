@@ -14,7 +14,7 @@
             <div class="input-group-btn">
                 @if (ViewBag.CurrentFilter != null)
                 {                    
-                <a class="btn btn-default" href="/"@Html.Raw(ViewBag.CurrentController ?? "") >
+                <a class="btn btn-default" href="/@Html.Raw(ViewBag.CurrentController ?? "")" >
                     <i class="glyphicon glyphicon-erase"></i>
                 </a>
                 }
