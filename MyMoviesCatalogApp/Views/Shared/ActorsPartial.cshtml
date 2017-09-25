@@ -4,19 +4,24 @@
 @foreach (Actor g in Model)
 {
     <div class="btn-group">
-        <button type="button" class="btn btn-default btn-xs">@g.FullName</button>
+        <button id="search_fullname_button" type="button" class="btn btn-default btn-xs">@g.FullName</button>
         <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
             <span class="caret"></span>
         </button>
         <ul class="dropdown-menu" role="menu" style="min-width:300px">
-            <li><form action="/Movie" class="form-inline"><input type="hidden" id="SearchString" name="SearchString" value="@g.Person.FirstName" /><button type="submit" class="btn-link">Filter by @g.Person.FirstName</button></form></li>
+            <li><form action="/Movie" class="form-inline"><input type="hidden" id="search_firstname_button" name="SearchString" value="@g.Person.FirstName" /><button type="submit" class="btn-link">Filter by @g.Person.FirstName</button></form></li>
             @if (g.Person.MiddleName != null && g.Person.MiddleName.Length > 0)
             {
-                <li><form action="/Movie" class="form-inline"><input type="hidden" id="SearchString" name="SearchString" value="@g.Person.MiddleName" /><button type="submit" class="btn-link">Filter by @g.Person.MiddleName</button></form></li>
+                <li><form action="/Movie" class="form-inline"><input type="hidden" id="search_middlename_button" name="SearchString" value="@g.Person.MiddleName" /><button type="submit" class="btn-link">Filter by @g.Person.MiddleName</button></form></li>
             }
-            <li><form action="/Movie" class="form-inline"><input type="hidden" id="SearchString" name="SearchString" value="@g.Person.LastName" /><button type="submit" class="btn-link">Filter by @g.Person.LastName</button></form></li>
-            <li><form action="/Movie" class="form-inline"><input type="hidden" id="SearchString" name="SearchString" value="@g.Person.FullName" /><button type="submit" class="btn-link" style="text-align:left">Filter by @g.Person.FullName</button></form></li>
+            <li><form action="/Movie" class="form-inline"><input type="hidden" id="search_lastname_button" name="SearchString" value="@g.Person.LastName" /><button type="submit" class="btn-link">Filter by @g.Person.LastName</button></form></li>
+            <li><form action="/Movie" class="form-inline" id="search_fullname_form"><input type="hidden" id="SearchString" name="SearchString" value="@g.Person.FullName" /><button type="submit" class="btn-link" style="text-align:left">Filter by @g.Person.FullName</button></form></li>
         </ul>
     </div>
-
 }
+
+<script type="text/javascript">    
+    $("#search_fullname_button").on('click', function () {
+        $("#search_fullname_form").submit();
+    });
+</script>

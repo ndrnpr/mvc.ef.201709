@@ -52,9 +52,9 @@ namespace MyMoviesCatalogApp.Controllers
                 movies = movies.Where(s =>
                     s.OriginalName.Contains(searchString)
                     || s.Description.Contains(searchString)
-                    || s.Actors.Any(a => (a.Person.FirstName + " " + a.Person.MiddleName + " " + a.Person.LastName).Contains(searchString))
-                    || s.Writers.Any(w => (w.Person.FirstName + " " + w.Person.MiddleName + " " + w.Person.LastName).Contains(searchString))
-                    || (s.Director.FirstName + " " + s.Director.MiddleName + " " + s.Director.LastName).Contains(searchString)
+                    || s.Actors.Any(a => (a.Person != null && (a.Person.FirstName + (a.Person.MiddleName != null ? " " + a.Person.MiddleName : "") + " " + a.Person.LastName).Contains(searchString)))
+                    || s.Writers.Any(w => (w.Person != null && (w.Person.FirstName + (w.Person.MiddleName != null ? " " + w.Person.MiddleName : "")+ " " + w.Person.LastName).Contains(searchString)))
+                    || (s.Director != null && (s.Director.FirstName + (s.Director.MiddleName != null ? " " + s.Director.MiddleName : "") + " " + s.Director.LastName).Contains(searchString))
                     || s.Genres.Any(g => g.Name.Contains(searchString)));
             }
             switch (sortOrder)
@@ -103,13 +103,11 @@ namespace MyMoviesCatalogApp.Controllers
         [Authorize()]
         // GET: MovieInfo/Create
         public ActionResult Create()
-        {
-            //var genresgroups = db.GenreGroups.Select(g => new SelectListGroup() { Name = g.Name });
-            var genres = new MultiSelectList(db.Genres.OrderBy(g => g.GroupID).ThenBy(g => g.Name).ToList(), "ID", "Name", "Group.Name");
-            ViewBag.GenresList = genres; // db.Genres.OrderBy(g => g.GroupID).ThenBy(g => g.Name).Select(s => new SelectListItem() { Value = s.ID.ToString(), Text = s.Name, Selected = selected.Contains(s.ID.ToString()) }).ToList();
-            ViewBag.ActorsList = new MultiSelectList(db.Actors.OrderBy(a => a.Person.LastName).ToList(), "ID", "FullName");
-            ViewBag.WritersList = new MultiSelectList(db.Writers.OrderBy(w => w.Person.LastName).ToList(), "ID", "FullName");
-            ViewBag.PersonsList = new SelectList(db.Persons, "ID", "FullName");
+        {            
+            ViewBag.GenresList = new MultiSelectList(db.Genres.OrderBy(g => g.GroupID).ThenBy(g => g.Name).ToList(), "ID", "Name", "Group.Name");
+            ViewBag.ActorsList = new MultiSelectList(db.Persons.Select(p => new { Person = p, IsActor = db.Actors.Where(w => w.PersonID == p.ID).Count() }).OrderByDescending(p => p.IsActor).ThenBy(p => p.Person.LastName).ToList(), "Person.ID", "Person.FullName");
+            ViewBag.WritersList = new MultiSelectList(db.Persons.Select(p => new { Person = p, IsWriter = db.Writers.Where(w => w.PersonID == p.ID).Count() }).OrderByDescending(p => p.IsWriter).ThenBy(p => p.Person.LastName).ToList(), "Person.ID", "Person.FullName");
+            ViewBag.PersonsList = new SelectList(db.Persons.Select(p => new { Person = p, IsDirector = db.Movies.Where(w => w.DirectorID == p.ID).Count() }).OrderByDescending(p => p.IsDirector).ThenBy(p => p.Person.LastName).ToList(), "Person.ID", "Person.FullName");
             return View();
         }
 

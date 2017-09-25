@@ -34,12 +34,12 @@ namespace MyMoviesCatalogApp.Controllers
             var movies = from s in db.Movies select s;
             if (!String.IsNullOrEmpty(searchString))
             {
-                movies = movies.Where(s => 
-                    s.OriginalName.Contains(searchString) 
-                    || s.Description.Contains(searchString) 
-                    || s.Actors.Any(a => (a.Person.FirstName + " " + a.Person.MiddleName + " " + a.Person.LastName).Contains(searchString))
-                    || s.Writers.Any(w => (w.Person.FirstName + " " + w.Person.MiddleName + " " + w.Person.LastName).Contains(searchString))
-                    || (s.Director.FirstName + " " + s.Director.MiddleName + " " + s.Director.LastName).Contains(searchString)
+                movies = movies.Where(s =>
+                    s.OriginalName.Contains(searchString)
+                    || s.Description.Contains(searchString)
+                    || s.Actors.Any(a => (a.Person != null && (a.Person.FirstName + (a.Person.MiddleName != null ? " " + a.Person.MiddleName : "") + " " + a.Person.LastName).Contains(searchString)))
+                    || s.Writers.Any(w => (w.Person != null && (w.Person.FirstName + (w.Person.MiddleName != null ? " " + w.Person.MiddleName : "") + " " + w.Person.LastName).Contains(searchString)))
+                    || (s.Director != null && (s.Director.FirstName + (s.Director.MiddleName != null ? " " + s.Director.MiddleName : "") + " " + s.Director.LastName).Contains(searchString))
                     || s.Genres.Any(g => g.Name.Contains(searchString)));
             }
             switch (sortOrder)
