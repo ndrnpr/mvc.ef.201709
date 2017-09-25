@@ -34,5 +34,9 @@ namespace MyMoviesCatalogApp.Models
         [NotMapped]
         public HttpPostedFileBase _FileData { get; set; }
 
+        public Movie()
+        {
+            Genres = new HashSet<Genre>();
+        }
     }
 }

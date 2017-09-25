@@ -13,8 +13,8 @@
             <input id="SearchString" name="SearchString" type="text" class="form-control form-group-lg" placeholder="Search by names or phrases..." style="max-width:unset" value="@ViewBag.CurrentFilter" />
             <div class="input-group-btn">
                 @if (ViewBag.CurrentFilter != null)
-                {
-                <a class="btn btn-default" href="/Movie">
+                {                    
+                <a class="btn btn-default" href="/"@Html.Raw(ViewBag.CurrentController ?? "") >
                     <i class="glyphicon glyphicon-erase"></i>
                 </a>
                 }
@@ -33,7 +33,7 @@
         <!--Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount-->
         @Html.PagedListPager(Model, page => Url.Action("Index", ViewBag.CurrentController ?? "Home", new { page, sortOrder = ViewBag.CurrentSort, currentFilter = ViewBag.CurrentFilter }))
         <div class="container-fluid" style="align-self:center">
-            @for (int row = 0; row < 2; row++)
+            @for (int row = 0; row < Model.PageSize / 3; row++)
             {
                 <div class="row padded">
                     <div class="col-sm-pull-12">
